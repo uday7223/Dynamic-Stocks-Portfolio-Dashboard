@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import PortfolioTable from "../components/PortfolioTable";
 import SectorSummary from "../components/SectorSummary";
 
 
-const stocks = [
+const initialStocks  = [
   { symbol: "AAPL", sector: "Technology", investment: 100000, quantity: 500 },
   { symbol: "TSLA", sector: "Automotive", investment: 80000, quantity: 200 },
   { symbol: "GOOGL", sector: "Technology", investment: 120000, quantity: 300 },
@@ -20,11 +21,48 @@ const stocks = [
 
 
 export default function Home() {
+  const [stockData, setStockData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const updatedData = await Promise.all(
+        initialStocks.map(async (stock) => {
+          try {
+            const res = await fetch(`/api/stocks?symbol=${stock.symbol}`);
+            const text = await res.text();
+            const data = JSON.parse(text);
+            const quantity = stock.quantity || 10;
+            const purchasePrice = parseFloat((stock.investment / quantity).toFixed(2));
+
+            return {
+              ...data,
+              symbol: stock.symbol,
+              sector: stock.sector,
+              investment: stock.investment,
+              quantity,
+              purchasePrice,
+              presentValue: parseFloat((data.regularMarketPrice * quantity).toFixed(2)),
+              gainLoss: parseFloat(((data.regularMarketPrice - purchasePrice) * quantity).toFixed(2)),
+            };
+          } catch (error) {
+            console.error(`Error fetching ${stock.symbol}:`, error);
+            return null;
+          }
+        })
+      );
+      setStockData(updatedData.filter(Boolean));
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div>
       {/* <h1>Dynamic Portfolio Dashboard</h1> */}
-      <SectorSummary stocks={stocks} />
-      <PortfolioTable stocks={stocks} />
+      <SectorSummary stocks={stockData} />
+      <PortfolioTable stockData={stockData} />
     </div>
   );  
 }
