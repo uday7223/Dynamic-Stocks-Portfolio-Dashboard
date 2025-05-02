@@ -1,0 +1,17 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  td:nth-child(8) { /* Gain/Loss column */
+    color: green; /* Default color */
+  }
+  
+  td.negative {
+    color: red;
+  }
