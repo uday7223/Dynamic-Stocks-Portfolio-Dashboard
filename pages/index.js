@@ -30,6 +30,9 @@ export default function Home() {
           try {
             const res = await fetch(`/api/stocks?symbol=${stock.symbol}`);
             const text = await res.text();
+            if (!text || text.trim() === "") {
+              throw new Error("Empty response");
+            }
             const data = JSON.parse(text);
             const quantity = stock.quantity || 10;
             const purchasePrice = parseFloat((stock.investment / quantity).toFixed(2));
@@ -43,6 +46,8 @@ export default function Home() {
               purchasePrice,
               presentValue: parseFloat((data.regularMarketPrice * quantity).toFixed(2)),
               gainLoss: parseFloat(((data.regularMarketPrice - purchasePrice) * quantity).toFixed(2)),
+              // regularMarketPrice: parseFloat((data.regularMarketPrice * (1 + Math.random() * 0.9)).toFixed(2)),
+
             };
           } catch (error) {
             console.error(`Error fetching ${stock.symbol}:`, error);

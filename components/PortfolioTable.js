@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useTable } from "react-table";
 
 const PortfolioTable = ({ stockData }) => {
+  // console.log("Rendering PortfolioTable with stockData:", stockData);
     const totalInvestment = useMemo(() => {
       return stockData.reduce((sum, s) => sum + s.investment, 0);
     }, [stockData]);
